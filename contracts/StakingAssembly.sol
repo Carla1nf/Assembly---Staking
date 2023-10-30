@@ -9,7 +9,7 @@ contract StakingAssembly {
 
     constructor(address _token) {
         assembly {
-          sstore(1, _token)
+          sstore(0x01, _token)
         }
     }
 
@@ -20,21 +20,27 @@ contract StakingAssembly {
         address _token = token;
 
         assembly {
+       // ----------------------------------
+       // Transfer tokens from caller to this contract
         mstore(0, functionSelector)
-        mstore(add(0, 0x04), caller())  // First argument: from
-        mstore(add(0, 0x24), thisContract)    // Second argument: to
-        mstore(add(0, 0x44), amount) // Third argument: value
+        mstore(add(0, 0x04), caller())  
+        mstore(add(0, 0x24), thisContract)   
+        mstore(add(0, 0x44), amount) 
         
         let success := call(230000, _token, 0, 0, 0x64, 0, 0)
         if eq(success, 0) {
             revert(0, 0)
         }
+
+        // -------------------------------------------
+
+        // Update balance mapping ----
           let data := mload(0x64)
           mstore(data, caller())
           mstore(add(data, 32), 2)
           let hash := keccak256(data, add(data, 64))
           sstore(hash, amount)
-
+        // ---------------------------
         }
     }
 
