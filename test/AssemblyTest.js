@@ -12,8 +12,10 @@ describe("Lock", function () {
     let tokenContract;
     let stakingContract;
     let owner;
+    let secondAccount;
+
     this.beforeEach(async () => {
-      [owner] = await ethers.getSigners();
+      [owner, secondAccount] = await ethers.getSigners();
       const Proxy = await ethers.getContractFactory("Token");
       const Implementation = await ethers.getContractFactory("StakingAssembly");
       tokenContract = await Proxy.deploy();
@@ -21,9 +23,11 @@ describe("Lock", function () {
 
     });  
   
-   it("Proxy it" , async () => {
+   it("Stake" , async () => {
    const data = await stakingContract.token();
-   expect(data).to.equal(tokenContract.target);
+   await expect(stakingContract.connect(secondAccount).changeStatus(false)).to.be.reverted;
+   stakingContract.changeStatus(true)
+    expect(data).to.equal(tokenContract.target);
     await tokenContract.mint(owner.address, 100);
     await tokenContract.approve(stakingContract.target, 100);
     await stakingContract.stake(100);
@@ -31,7 +35,7 @@ describe("Lock", function () {
     console.log(data2);
     expect( await tokenContract.balanceOf(owner.address)).to.equal(0);
 
-
+    
     })
 
 });

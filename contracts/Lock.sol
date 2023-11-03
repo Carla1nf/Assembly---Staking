@@ -42,6 +42,7 @@ contract ProxyContract {
     }
   
   function getMappingSlot(uint num, uint slot) public pure returns(bytes32 hash) {
+    
        assembly {
     
         mstore(0, num)

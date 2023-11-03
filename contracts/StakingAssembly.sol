@@ -4,16 +4,34 @@ contract StakingAssembly {
     
     address payable public owner;
     address public token;
-    
+    bool isOpen;
+
     mapping (address => uint) public balance;
 
     constructor(address _token) {
         assembly {
+          sstore(0x00, caller())
           sstore(0x01, _token)
         }
     }
 
-    function stake(uint amount) public {
+    modifier onlyOwner() {
+    assembly {
+      switch eq(caller(), sload(0x00))
+      case 0 { revert(0, 0) }
+    }
+    _;
+    }
+
+    modifier onlyOpen() {
+      assembly {
+        switch eq(sload(0x02), 1)
+        case 0 {revert(0,0)}
+      }
+      _;
+    }
+
+    function stake(uint amount) public onlyOpen() {
       
         bytes4 functionSelector = bytes4(keccak256("transferFrom(address,address,uint256)"));
         address thisContract = address(this);
@@ -42,6 +60,12 @@ contract StakingAssembly {
           sstore(hash, amount)
         // ---------------------------
         }
+    }
+
+    function changeStatus(bool _isOpen) public onlyOwner {
+      assembly {
+        sstore(0x02, _isOpen)
+      }
     }
 
 }
