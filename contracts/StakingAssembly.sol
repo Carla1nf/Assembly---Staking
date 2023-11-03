@@ -45,7 +45,7 @@ contract StakingAssembly {
         mstore(add(0, 0x24), thisContract)   
         mstore(add(0, 0x44), amount) 
         
-        let success := call(230000, _token, 0, 0, 0x64, 0, 0)
+        let success := call(230000, sload(0x01), 0, 0, 0x64, 0, 0)
         if eq(success, 0) {
             revert(0, 0)
         }
